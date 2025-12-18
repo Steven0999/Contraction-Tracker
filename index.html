@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contraction Timer</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* Prevent scroll bounce on iOS */
+        html, body {
+            position: fixed;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
+        .history-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+        .history-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(225, 29, 72, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+        }
+        .animate-pulse-custom {
+            animation: pulse-ring 2s infinite;
+        }
+
+        .btn-press {
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-press:active {
+            transform: scale(0.92);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <!-- Main App Wrapper -->
+    <div class="max-w-md w-full mx-auto bg-white h-screen flex flex-col shadow-2xl">
+        
+        <!-- Section 1: Header & Timer (Fixed Height) -->
+        <header id="mainHeader" class="bg-rose-500 text-white p-6 rounded-b-[2rem] shadow-md z-30 transition-colors duration-500 flex-shrink-0">
+            <div class="flex justify-between items-center mb-2">
+                <h1 class="text-xl font-bold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Contraction Timer
+                </h1>
+                <button onclick="resetData()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center py-2">
+                <span id="timerLabel" class="text-[10px] font-bold opacity-80 uppercase tracking-[0.2em] mb-1">Ready</span>
+                <div id="timerDisplay" class="text-6xl font-mono font-bold tracking-tighter tabular-nums">00:00</div>
+            </div>
+        </header>
+
+        <!-- Section 2: Controls & Stats -->
+        <div class="flex-shrink-0 bg-white px-6 pb-4 pt-4 z-20">
+            <!-- Button Row -->
+            <div class="flex justify-center mb-6">
+                <button id="mainBtn" onclick="toggleTimer()" class="btn-press w-36 h-36 rounded-full bg-white border-4 border-slate-50 shadow-xl flex flex-col items-center justify-center relative overflow-hidden">
+                    <div id="btnInner" class="w-full h-full flex flex-col items-center justify-center text-white bg-emerald-500 transition-colors duration-300">
+                        <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/> 
+                        </svg>
+                        <span id="btnText" class="font-black text-sm tracking-widest">START</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-3 gap-2">
+                <div class="bg-slate-50 border border-slate-100 p-2 rounded-xl flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase">Count</span>
+                    <span id="statCount" class="text-lg font-bold text-slate-700">0</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-100 p-2 rounded-xl flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase">Avg Dur</span>
+                    <span id="statAvgDur" class="text-lg font-bold text-slate-700">--:--</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-100 p-2 rounded-xl flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase">Avg Rest</span>
+                    <span id="statAvgRest" class="text-lg font-bold text-slate-700">--:--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: History (Fills remaining space) -->
+        <div class="flex-1 flex flex-col overflow-hidden px-6 pb-4">
+            <div class="flex items-center gap-2 text-slate-400 mb-2 shrink-0">
+                <span class="text-[10px] font-black uppercase tracking-widest">History Log</span>
+                <div class="h-[1px] flex-1 bg-slate-100"></div>
+            </div>
+
+            <div id="historyList" class="flex-1 overflow-y-auto space-y-2 history-scroll pr-1">
+                <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-300 py-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-xs font-medium">No records found</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="p-2 text-center bg-slate-50 border-t border-slate-100 text-[9px] text-slate-400 uppercase tracking-tighter shrink-0">
+            LocalStorage Enabled &bull; No Database Required
+        </footer>
+    </div>
+
+    <script>
+        let appState = {
+            status: 'idle',
+            startTime: null,
+            lastEndTime: null,
+            contractions: []
+        };
+
+        let timerInterval = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            updateUI();
+            if (appState.status !== 'idle') startTicker();
+        });
+
+        function toggleTimer() {
+            const now = Date.now();
+            if (appState.status === 'idle' || appState.status === 'resting') {
+                appState.status = 'active';
+                appState.startTime = now;
+                saveData();
+                startTicker();
+                updateUI();
+            } else if (appState.status === 'active') {
+                const duration = now - appState.startTime;
+                let prevRest = appState.lastEndTime ? (appState.startTime - appState.lastEndTime) : null;
+
+                appState.contractions.unshift({
+                    id: Date.now(),
+                    start: appState.startTime,
+                    end: now,
+                    duration: duration,
+                    restBefore: prevRest
+                });
+                
+                appState.status = 'resting';
+                appState.lastEndTime = now;
+                appState.startTime = null;
+                saveData();
+                updateUI();
+            }
+        }
+
+        function startTicker() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimerDisplay, 100);
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerDisplay');
+            const label = document.getElementById('timerLabel');
+            const now = Date.now();
+            
+            if (appState.status === 'active') {
+                display.innerText = formatTime(now - appState.startTime);
+                label.innerText = "Current Contraction";
+            } else if (appState.status === 'resting') {
+                display.innerText = formatTime(now - appState.lastEndTime);
+                label.innerText = "Time Since Last";
+            } else {
+                display.innerText = "00:00";
+                label.innerText = "Ready";
+            }
+        }
+
+        function updateUI() {
+            const header = document.getElementById('mainHeader');
+            const mainBtn = document.getElementById('mainBtn');
+            const btnInner = document.getElementById('btnInner');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+
+            if (appState.status === 'active') {
+                header.classList.replace('bg-slate-700', 'bg-rose-500');
+                header.classList.replace('bg-blue-500', 'bg-rose-500');
+                mainBtn.classList.add('animate-pulse-custom');
+                btnInner.className = "w-full h-full flex flex-col items-center justify-center text-white bg-rose-500";
+                btnIcon.innerHTML = '<path d="M6 6h12v12H6z" />';
+                btnText.innerText = "STOP";
+            } else if (appState.status === 'resting') {
+                header.classList.replace('bg-rose-500', 'bg-blue-500');
+                mainBtn.classList.remove('animate-pulse-custom');
+                btnInner.className = "w-full h-full flex flex-col items-center justify-center text-white bg-emerald-500";
+                btnIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+                btnText.innerText = "START";
+            } else {
+                header.className = header.className.replace(/bg-\w+-\d+/, 'bg-slate-700');
+                mainBtn.classList.remove('animate-pulse-custom');
+                btnInner.className = "w-full h-full flex flex-col items-center justify-center text-white bg-emerald-500";
+                btnIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+                btnText.innerText = "START";
+            }
+
+            updateStats();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (appState.contractions.length === 0) {
+                list.innerHTML = '';
+                list.appendChild(emptyState);
+                return;
+            }
+
+            list.innerHTML = appState.contractions.map((c, i) => {
+                const count = appState.contractions.length - i;
+                return `
+                <div class="bg-white border border-slate-100 rounded-lg p-3 flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs shrink-0">${count}</div>
+                        <div class="flex flex-col">
+                            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">${new Date(c.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-emerald-600">Dur: ${formatTime(c.duration)}</span>
+                                ${c.restBefore ? `<span class="text-[10px] text-blue-500 font-medium">Rest: ${formatTime(c.restBefore)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="deleteContraction(${c.id})" class="p-1.5 text-slate-300 hover:text-rose-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        function updateStats() {
+            const count = appState.contractions.length;
+            const avgDur = count > 0 ? (appState.contractions.reduce((a, b) => a + b.duration, 0) / count) : 0;
+            const rests = appState.contractions.filter(c => c.restBefore).map(c => c.restBefore);
+            const avgRest = rests.length > 0 ? (rests.reduce((a, b) => a + b, 0) / rests.length) : 0;
+
+            document.getElementById('statCount').innerText = count;
+            document.getElementById('statAvgDur').innerText = formatTime(avgDur);
+            document.getElementById('statAvgRest').innerText = formatTime(avgRest);
+        }
+
+        function deleteContraction(id) {
+            appState.contractions = appState.contractions.filter(c => c.id !== id);
+            saveData();
+            updateUI();
+        }
+
+        function resetData() {
+            if(confirm('Reset all data?')) {
+                appState = { status: 'idle', startTime: null, lastEndTime: null, contractions: [] };
+                if(timerInterval) clearInterval(timerInterval);
+                saveData();
+                updateUI();
+            }
+        }
+
+        function formatTime(ms) {
+            if (!ms && ms !== 0) return "--:--";
+            const s = Math.floor(ms / 1000);
+            return `${Math.floor(s/60).toString().padStart(2, '0')}:${(s%60).toString().padStart(2, '0')}`;
+        }
+
+        function saveData() { localStorage.setItem('contractionTimerData', JSON.stringify(appState)); }
+        function loadData() {
+            const saved = localStorage.getItem('contractionTimerData');
+            if (saved) appState = JSON.parse(saved);
+        }
+    </script>
+</body>
+</html>
+
