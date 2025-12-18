@@ -50,7 +50,7 @@
         }
 
         .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
+            animation: fadeIn 0.3s ease-out forwards;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
@@ -85,8 +85,8 @@
         </header>
 
         <!-- Action Button Section -->
-        <div class="flex-shrink-0 flex justify-center -mt-12 z-40 mb-4">
-            <button id="mainBtn" onclick="toggleTimer()" class="btn-press w-40 h-40 rounded-full bg-white border-8 border-slate-50 shadow-xl flex flex-col items-center justify-center overflow-hidden">
+        <div class="flex-shrink-0 flex justify-center -mt-12 z-40 mb-2">
+            <button id="mainBtn" onclick="toggleTimer()" class="btn-press w-36 h-36 rounded-full bg-white border-8 border-slate-50 shadow-xl flex flex-col items-center justify-center overflow-hidden">
                 <div id="btnInner" class="w-full h-full flex flex-col items-center justify-center text-white bg-emerald-500 transition-colors duration-300">
                     <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z"/> 
@@ -97,16 +97,15 @@
         </div>
 
         <!-- Main Workspace -->
-        <main class="flex-1 flex flex-col px-6 pb-4 overflow-hidden gap-4">
+        <main class="flex-1 flex flex-col px-6 pb-4 overflow-hidden gap-3">
             
-            <!-- Intensity Picker (Hidden by default) -->
-            <div id="intensityPicker" class="hidden bg-rose-50 border border-rose-100 rounded-2xl p-4 fade-in">
-                <div class="text-center mb-3">
-                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wide">Intensity Level</span>
-                    <p class="text-[10px] text-rose-400">Rate this contraction (1-10)</p>
+            <!-- Intensity Picker -->
+            <div id="intensityPicker" class="hidden bg-rose-50 border border-rose-100 rounded-2xl p-4 fade-in shadow-inner">
+                <div class="text-center mb-2">
+                    <span class="text-xs font-bold text-rose-700 uppercase tracking-wide">Intensity Level</span>
+                    <p class="text-[10px] text-rose-400">How strong was that last one?</p>
                 </div>
                 <div class="grid grid-cols-5 gap-2">
-                    <!-- JS will handle rating clicks -->
                     <button onclick="setIntensity(1)" class="p-2 rounded-lg bg-white border border-rose-200 text-rose-600 font-bold hover:bg-rose-500 hover:text-white transition-colors">1</button>
                     <button onclick="setIntensity(2)" class="p-2 rounded-lg bg-white border border-rose-200 text-rose-600 font-bold hover:bg-rose-500 hover:text-white transition-colors">2</button>
                     <button onclick="setIntensity(3)" class="p-2 rounded-lg bg-white border border-rose-200 text-rose-600 font-bold hover:bg-rose-500 hover:text-white transition-colors">3</button>
@@ -121,69 +120,63 @@
             </div>
 
             <!-- Stats Bar -->
-            <div class="grid grid-cols-3 gap-3 flex-shrink-0">
-                <div class="bg-slate-50 border border-slate-100 p-3 rounded-2xl flex flex-col items-center">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase">Count</span>
-                    <span id="statCount" class="text-xl font-bold text-slate-700">0</span>
+            <div id="statsBar" class="grid grid-cols-3 gap-3 flex-shrink-0">
+                <div class="bg-slate-50 border border-slate-100 p-2 rounded-2xl flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase">Count</span>
+                    <span id="statCount" class="text-lg font-bold text-slate-700">0</span>
                 </div>
-                <div class="bg-slate-50 border border-slate-100 p-3 rounded-2xl flex flex-col items-center">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase">Avg Dur</span>
-                    <span id="statAvgDur" class="text-xl font-bold text-slate-700">--:--</span>
+                <div class="bg-slate-50 border border-slate-100 p-2 rounded-2xl flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase">Avg Dur</span>
+                    <span id="statAvgDur" class="text-lg font-bold text-slate-700">--:--</span>
                 </div>
-                <div class="bg-slate-50 border border-slate-100 p-3 rounded-2xl flex flex-col items-center">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase">Avg Rest</span>
-                    <span id="statAvgRest" class="text-xl font-bold text-slate-700">--:--</span>
+                <div class="bg-slate-50 border border-slate-100 p-2 rounded-2xl flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase">Avg Rest</span>
+                    <span id="statAvgRest" class="text-lg font-bold text-slate-700">--:--</span>
                 </div>
             </div>
 
             <!-- History List -->
             <div class="flex-1 flex flex-col overflow-hidden bg-white border border-slate-100 rounded-3xl shadow-sm">
-                <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-slate-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="text-xs font-bold uppercase">History</span>
+                        <span class="text-[10px] font-bold uppercase">History</span>
                     </div>
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Intensity</span>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Int.</span>
                 </div>
                 
                 <div id="historyList" class="flex-1 overflow-y-auto p-2 space-y-2 history-scroll">
-                    <!-- History entries injected here -->
                     <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-300 py-10 opacity-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="text-xs font-medium">Waiting for first record...</p>
+                        <p class="text-xs font-medium">No records yet.</p>
                     </div>
                 </div>
             </div>
 
         </main>
 
-        <footer class="p-3 text-center bg-slate-50 border-t border-slate-200 text-[10px] text-slate-400">
-            History saved to your device automatically.
+        <footer class="p-2 text-center bg-slate-50 border-t border-slate-200 text-[9px] text-slate-400">
+            LocalStorage Enabled
         </footer>
     </div>
 
     <script>
-        // --- App State ---
         let state = {
-            status: 'idle', // 'idle', 'active', 'resting'
+            status: 'idle',
             startTime: null,
             lastEndTime: null,
             contractions: [],
-            lastAddedId: null
+            lastAddedId: null,
+            isAwaitingIntensity: false
         };
 
         let ticker = null;
 
-        // --- Init ---
         window.onload = () => {
-            const saved = localStorage.getItem('contraction_data');
+            const saved = localStorage.getItem('contraction_data_v2');
             if (saved) {
                 state = JSON.parse(saved);
-                // Reset status to resting or idle if we were active to avoid timer jumpiness on refresh
                 if (state.status === 'active') state.status = 'idle';
             }
             updateUI();
@@ -212,18 +205,16 @@
             }
         }
 
-        // --- Core Functions ---
-
         function toggleTimer() {
             const now = Date.now();
+            const picker = document.getElementById('intensityPicker');
 
             if (state.status === 'idle' || state.status === 'resting') {
-                // STARTING CONTRACTION
                 state.status = 'active';
                 state.startTime = now;
-                document.getElementById('intensityPicker').classList.add('hidden');
+                state.isAwaitingIntensity = false;
+                picker.classList.add('hidden');
             } else {
-                // STOPPING CONTRACTION
                 const duration = now - state.startTime;
                 const id = Date.now();
                 
@@ -241,11 +232,10 @@
                 state.status = 'resting';
                 state.lastEndTime = now;
                 state.startTime = null;
-
-                // Show intensity picker
-                document.getElementById('intensityPicker').classList.remove('hidden');
+                state.isAwaitingIntensity = true;
+                
+                picker.classList.remove('hidden');
             }
-
             saveAndRefresh();
         }
 
@@ -254,6 +244,7 @@
             if (index !== -1) {
                 state.contractions[index].intensity = val;
             }
+            state.isAwaitingIntensity = false;
             document.getElementById('intensityPicker').classList.add('hidden');
             saveAndRefresh();
         }
@@ -264,6 +255,8 @@
                 if (state.contractions.length === 0) {
                     state.status = 'idle';
                     state.lastEndTime = null;
+                    state.isAwaitingIntensity = false;
+                    document.getElementById('intensityPicker').classList.add('hidden');
                 }
                 saveAndRefresh();
             }
@@ -276,17 +269,17 @@
                     startTime: null,
                     lastEndTime: null,
                     contractions: [],
-                    lastAddedId: null
+                    lastAddedId: null,
+                    isAwaitingIntensity: false
                 };
-                localStorage.removeItem('contraction_data');
+                localStorage.removeItem('contraction_data_v2');
+                document.getElementById('intensityPicker').classList.add('hidden');
                 updateUI();
             }
         }
 
-        // --- UI Helpers ---
-
         function saveAndRefresh() {
-            localStorage.setItem('contraction_data', JSON.stringify(state));
+            localStorage.setItem('contraction_data_v2', JSON.stringify(state));
             updateUI();
         }
 
@@ -296,8 +289,15 @@
             const btnInner = document.getElementById('btnInner');
             const btnText = document.getElementById('btnText');
             const btnIcon = document.getElementById('btnIcon');
+            const picker = document.getElementById('intensityPicker');
 
-            // Button & Header states
+            // Maintain intensity picker visibility if awaiting response
+            if (state.isAwaitingIntensity && state.status === 'resting') {
+                picker.classList.remove('hidden');
+            } else {
+                picker.classList.add('hidden');
+            }
+
             if (state.status === 'active') {
                 header.className = header.className.replace(/bg-\w+-\d+/, 'bg-rose-500');
                 mainBtn.classList.add('animate-pulse-custom');
@@ -335,11 +335,8 @@
 
         function renderHistory() {
             const list = document.getElementById('historyList');
-            const empty = document.getElementById('emptyState');
-
             if (state.contractions.length === 0) {
-                list.innerHTML = '';
-                list.appendChild(empty);
+                list.innerHTML = '<div class="h-full flex items-center justify-center text-slate-300 py-10 opacity-50 text-xs">No records yet.</div>';
                 return;
             }
 
@@ -350,20 +347,20 @@
                 const intensityColor = c.intensity ? 'bg-rose-50 border-rose-200 text-rose-600' : 'bg-slate-50 border-slate-100 text-slate-300';
 
                 return `
-                <div class="bg-white border border-slate-50 rounded-2xl p-3 flex items-center justify-between shadow-sm animate-fadeIn">
+                <div class="bg-white border border-slate-50 rounded-2xl p-3 flex items-center justify-between shadow-sm fade-in">
                     <div class="flex items-center gap-3">
-                        <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs shrink-0">${displayIndex}</div>
+                        <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-[10px] shrink-0">${displayIndex}</div>
                         <div class="flex flex-col">
                             <span class="text-[9px] text-slate-400 font-bold uppercase">${timeStr}</span>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-bold text-emerald-600">Dur: ${formatTime(c.duration)}</span>
-                                ${c.restBefore ? `<span class="text-[10px] text-blue-400 font-medium tracking-tight">Rest: ${formatTime(c.restBefore)}</span>` : ''}
+                                <span class="text-xs font-bold text-emerald-600">${formatTime(c.duration)}</span>
+                                ${c.restBefore ? `<span class="text-[9px] text-blue-400 font-medium tracking-tight">Rest: ${formatTime(c.restBefore)}</span>` : ''}
                             </div>
                         </div>
                     </div>
                     
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm border ${intensityColor}">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border ${intensityColor}">
                             ${intensityVal}
                         </div>
                         <button onclick="deleteContraction(${c.id})" class="p-2 text-slate-200 hover:text-rose-500 transition-colors">
